@@ -54,11 +54,22 @@ Run the plugin locally:
 twilio flex:plugins:start
 ```
 
-## Creating Commands
+## Customizing Commands
 
 All chat commands are located in the `src/commands` directory. You can create new commands, modify, or remove the existing commands. Modify `src/commands/index.js` to reference the commands you wish to be usable in Flex.
 
-Within a command, the callback function is called when a user selects it. You may modify the message input text, send a message immediately, or do whatever you'd like!
+The command's callback function is called when a user selects it. You may modify the message input text, send a message immediately, trigger some other functionality, etc.
+
+The following sample commands are included:
+
+- **/date** Inserts the current date into the message
+- **/done** Wraps up and completes the current task
+- **/hello** Inserts "Hello (customer name)!" into the message, using the `name` task attribute
+- **/smile** Immediately sends the 😀 emoji, without modifying the current input contents
+
+## Known Issue
+
+The built-in "attach files" button will clear the input field. Using a custom attachment implementation (such as [the custom message media example plugin](https://github.com/twilio-professional-services/plugin-custom-message-media)) avoids this issue.
 
 ## Development
 

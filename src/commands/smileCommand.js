@@ -1,6 +1,6 @@
 export const smileCommand = {
   shortcut: 'smile',
-  description: 'Sends 😀',
+  description: 'Send 😀',
   callback: async (flex, manager, task, conversationSid, inputText) => {
     await flex.Actions.invokeAction("SendMessage", {
       body: "😀",
