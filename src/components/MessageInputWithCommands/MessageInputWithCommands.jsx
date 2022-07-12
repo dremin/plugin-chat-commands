@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
 import * as Flex from "@twilio/flex-ui";
 import { Combobox, useCombobox } from '@twilio-paste/core/combobox';
+import { Stack } from "@twilio-paste/core/stack";
 import { Text } from '@twilio-paste/text';
+import MessageInputAttachment from '../MessageInputAttachment/MessageInputAttachment'
 
-const MessageInputWithCommands = ({ commandsList, conversationSid, manager, messageState: { inputText: inputText }, task }) => {
+const MessageInputWithCommands = ({ commandsList, conversationSid, disabledReason, manager, messageState: { attachedFiles, inputText }, task }) => {
   const [command, setCommand] = useState(null);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [filteredCommands, setFilteredCommands] = useState([]);
+  const [isDisabled, setIsDisabled] = useState(false);
   
   const {closeMenu, openMenu, selectItem, ...state} = useCombobox({
     items: filteredCommands,
@@ -52,6 +55,14 @@ const MessageInputWithCommands = ({ commandsList, conversationSid, manager, mess
     }
     
   }, [filteredCommands])
+  
+  useEffect(() => {
+    if (!disabledReason) {
+      setIsDisabled(false);
+    } else {
+      setIsDisabled(true);
+    }
+  }, [disabledReason])
   
   const matchCommand = () => {
     const match = inputText.match(/(\s|^)(\/)([^\/\s]*)$/);
@@ -99,9 +110,15 @@ const MessageInputWithCommands = ({ commandsList, conversationSid, manager, mess
       return;
     }
     
+    if ((!e.target.value || e.target.value.length < 1) && (!attachedFiles || attachedFiles.length < 1)) {
+      // no message contents, don't send
+      return
+    }
+    
     await Flex.Actions.invokeAction("SendMessage", {
       body: e.target.value,
       conversationSid: conversationSid,
+      attachedFiles: attachedFiles
     });
   }
   
@@ -111,13 +128,21 @@ const MessageInputWithCommands = ({ commandsList, conversationSid, manager, mess
   }
   
   return (
-    <Combobox
-      autocomplete
-      items={filteredCommands}
-      labelText={manager.strings.InputPlaceHolder + ":"}
-      optionTemplate={item => <><Text as="span" fontWeight="fontWeightBold" paddingRight="space30">/{item.shortcut}</Text> {item.description}</>}
-      onKeyDown={e => handleKeyDown(e)}
-      state={{...state}} />
+    <Stack orientation='vertical'>
+      <Combobox
+        autocomplete
+        disabled={isDisabled}
+        items={filteredCommands}
+        labelText={manager.strings.InputPlaceHolder + ":"}
+        optionTemplate={item => <><Text as="span" fontWeight="fontWeightBold" paddingRight="space30">/{item.shortcut}</Text> {item.description}</>}
+        onKeyDown={e => handleKeyDown(e)}
+        state={{...state}} />
+      <Stack orientation='horizontal'>
+        {attachedFiles.map((attachedFile) => {
+          return <MessageInputAttachment attachedFile={attachedFile} conversationSid={conversationSid} />
+        })}
+      </Stack>
+    </Stack>
   );
 };
 
