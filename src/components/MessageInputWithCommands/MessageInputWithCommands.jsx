@@ -6,12 +6,14 @@ import { Text } from '@twilio-paste/text';
 import MessageInputAttachment from '../MessageInputAttachment/MessageInputAttachment'
 
 const MessageInputWithCommands = ({ commandsList, conversationSid, disabledReason, manager, messageState: { attachedFiles, inputText }, task }) => {
+  const inputPrompt = manager.strings.InputPlaceHolder + ":";
   const [command, setCommand] = useState(null);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [filteredCommands, setFilteredCommands] = useState([]);
   const [isDisabled, setIsDisabled] = useState(false);
+  const [labelText, setLabelText] = useState(inputPrompt);
   
-  const {closeMenu, openMenu, selectItem, ...state} = useCombobox({
+  const {closeMenu, openMenu, selectItem, setHighlightedIndex: setComboboxHighlightedIndex, ...state} = useCombobox({
     items: filteredCommands,
     inputValue: inputText,
     itemToString: _item => inputText,
@@ -50,6 +52,11 @@ const MessageInputWithCommands = ({ commandsList, conversationSid, disabledReaso
     
     if (filteredCommands.length > 0) {
       openMenu()
+      
+      // highlight first item in menu for keyboard access
+      if (highlightedIndex < 0) {
+        setComboboxHighlightedIndex(0);
+      }
     } else {
       closeMenu()
     }
@@ -58,8 +65,10 @@ const MessageInputWithCommands = ({ commandsList, conversationSid, disabledReaso
   
   useEffect(() => {
     if (!disabledReason) {
+      setLabelText(inputPrompt);
       setIsDisabled(false);
     } else {
+      setLabelText(disabledReason);
       setIsDisabled(true);
     }
   }, [disabledReason])
@@ -93,6 +102,7 @@ const MessageInputWithCommands = ({ commandsList, conversationSid, disabledReaso
   }
   
   const handleInput = async (inputValue) => {
+    // update Flex state with current input contents
     await Flex.Actions.invokeAction("SetInputText", {
       body: inputValue,
       conversationSid: conversationSid,
@@ -100,13 +110,19 @@ const MessageInputWithCommands = ({ commandsList, conversationSid, disabledReaso
   }
   
   const handleKeyDown = async (e) => {
-    if (e.keyCode !== 13) {
-      // Ignore key down events for everything except the return key
+    if (e.keyCode !== 13 && e.keyCode !== 9) {
+      // Ignore key down events for everything except the return and tab keys
       return;
     }
     
-    if (highlightedIndex >= 0) {
-      // menu item is highlighted, so don't do anything
+    if (highlightedIndex >= 0 && e.keyCode === 9) {
+      // select highlighted item with tab key
+      selectItem(filteredCommands[highlightedIndex]);
+      // prevent tabbing over to another element
+      e.preventDefault();
+      return;
+    } else if (highlightedIndex >= 0) {
+      // when a menu item is highlighted, combobox handles return key, so do nothing
       return;
     }
     
@@ -123,7 +139,7 @@ const MessageInputWithCommands = ({ commandsList, conversationSid, disabledReaso
   }
   
   const handleHighlight = (highlightedIndex) => {
-    // set highlight state to override return key handling
+    // set highlight state to use with return/tab key handling
     setHighlightedIndex(highlightedIndex)
   }
   
@@ -133,7 +149,7 @@ const MessageInputWithCommands = ({ commandsList, conversationSid, disabledReaso
         autocomplete
         disabled={isDisabled}
         items={filteredCommands}
-        labelText={manager.strings.InputPlaceHolder + ":"}
+        labelText={labelText}
         optionTemplate={item => <><Text as="span" fontWeight="fontWeightBold" paddingRight="space30">/{item.shortcut}</Text> {item.description}</>}
         onKeyDown={e => handleKeyDown(e)}
         state={{...state}} />
