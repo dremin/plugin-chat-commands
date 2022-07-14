@@ -96,6 +96,7 @@ const MessageInputWithCommands = ({ commandsList, conversationSid, disabledReaso
     // reset state
     setCommand(null);
     selectItem(null);
+    setHighlightedIndex(-1);
     
     // execute command
     commandDefinition.callback(Flex, manager, task, conversationSid, newInputText);
