@@ -6,7 +6,9 @@ This plugin adds custom "slash commands" to Flex UI 2.x messaging.
 
 ## Disclaimer
 
-**This software is to be considered "sample code", a Type B Deliverable, and is delivered "as-is" to the user. Twilio bears no responsibility to support the use or implementation of this software.**
+- **This software is to be considered "sample code", a Type B Deliverable, and is delivered "as-is" to the user. Twilio bears no responsibility to support the use or implementation of this software.**
+- This plugin replaces the default message input component. While we have tested this with various other plugins and haven't seen compatibility issues so far, this is something to be mindful of.
+- It is recommended to fork this plugin so that you can maintain a repository with your own custom chat commands.
 
 ## Pre-requisites
 
@@ -33,7 +35,7 @@ First, clone the repository and change to its directory:
 ```bash
 git clone https://github.com/twilio-professional-services/plugin-chat-commands.git
 
-cd plugin-emoji-picker
+cd plugin-chat-commands
 ```
 
 Copy `public/appConfig.example.js` to `public/appConfig.js`:
