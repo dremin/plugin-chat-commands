@@ -30,8 +30,9 @@ export default class ChatCommandsPlugin extends FlexPlugin {
               fontWeight: 'fontWeightNormal'
             },
             COMBOBOX_LISTBOX: {
-              bottom: '36px',
-              paddingBottom: 'space0'
+              bottom: '100%',
+              paddingBottom: 'space0',
+              marginBottom: '-24px'
             }
           }
         };
